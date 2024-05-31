@@ -21,7 +21,7 @@ foreach ($subscription in $subscriptions) {
 
     foreach ($vmssInstance in $vmss) {
         # Get all VMs that are part of the VMSS
-        $vms = Get-AzVmssVM -ResourceGroupName $vmssInstance.ResourceGroupName -VMScaleSetName $vmssInstance.Name -InstanceView
+        $vms = Get-AzVmssVM -ResourceGroupName $vmssInstance.ResourceGroupName -VMScaleSetName $vmssInstance.Name
         
         foreach ($vm in $vms) {
             # Check if MMA extension is installed
@@ -37,10 +37,10 @@ foreach ($subscription in $subscriptions) {
                     VMSSName          = $vmssInstance.Name
                     InstanceID        = $vm.InstanceId
                 }
-                Write-Output "MMA or OMS extension is installed on VM $($vm.Name) in resource group $($resourceGroup.ResourceGroupName)."
+                Write-Output "MMA or OMS extension is installed on Instance $InstanceID in VMSS $VMSSName in resource group $ResourceGroupName."
             }
             else {
-                Write-Output "MMA or OMS extension is not installed on VM $($vm.Name) in resource group $($resourceGroup.ResourceGroupName)."
+                Write-Output "MMA or OMS extension is not installed on Instance $InstanceID in VMSS $VMSSName in resource group $ResourceGroupName."
             }
         }
     }
