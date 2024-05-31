@@ -37,10 +37,10 @@ foreach ($subscription in $subscriptions) {
                     VMSSName          = $vmssInstance.Name
                     InstanceID        = $vm.InstanceId
                 }
-                Write-Output "MMA or OMS extension is installed on Instance $InstanceID in VMSS $VMSSName in resource group $ResourceGroupName."
+                Write-Output "MMA or OMS extension is installed on Instance $($vm.InstanceId) in VMSS $($vmssInstance.Name) in resource group $($vmssInstance.ResourceGroupName)."
             }
             else {
-                Write-Output "MMA or OMS extension is not installed on Instance $InstanceID in VMSS $VMSSName in resource group $ResourceGroupName."
+                Write-Output "MMA or OMS extension is not installed on Instance $($vm.InstanceId) in VMSS $($vmssInstance.Name) in resource group $($vmssInstance.ResourceGroupName)."
             }
         }
     }
