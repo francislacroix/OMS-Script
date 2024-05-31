@@ -13,16 +13,17 @@ $vmList = Import-Csv "VMList.csv"
 foreach ($vm in $vmList) {
     $SubscriptionId = $vm.SubscriptionId
     $ResourceGroupName = $vm.ResourceGroupName
-    $VMName = $vm.VMName
+    $VMScaleSetName = $vm.VMSSName
+    $VMInstanceID = $vm.InstanceId
 
     # Connect to the Azure account (make sure you are logged in)
-    Connect-AzAccount -Subscription $SubscriptionId
+    Set-AzContext -Subscription $SubscriptionId
 
-    # Get the VM
-    $VM = Get-AzVM -ResourceGroupName $ResourceGroupName -Name $VMName
+    # Get the InstanceView of the VM
+    $VM = Get-AzVmssVM -ResourceGroupName $ResourceGroupName -VMScaleSetName $VMScaleSetName -InstanceId $VMInstanceID
 
     # Check if MMA extension is installed
-    $MMAExtension = $VM.Extensions | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.Type -eq 'MicrosoftMonitoringAgent' }
+    $MMAExtension = $VMInstanceView.Resources | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.VirtualMachineExtensionType -eq 'MicrosoftMonitoringAgent' }
 
     if ($MMAExtension -ne $null) {
         # Remove MMA extension
@@ -33,7 +34,7 @@ foreach ($vm in $vmList) {
     }
 
     # Check if OMS extension is installed
-    $OMSExtension = $VM.Extensions | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.Type -eq 'OmsAgentForLinux' }
+    $OMSExtension = $VM.Extensions | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.VirtualMachineExtensionType -eq 'OmsAgentForLinux' }
 
     if ($OMSExtension -ne $null) {
         # Remove MMA extension

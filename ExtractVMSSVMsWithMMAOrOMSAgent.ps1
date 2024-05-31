@@ -12,35 +12,34 @@ $vmList = @()
 # Get all subscriptions we have access to
 $subscriptions = Get-AzSubscription
 
-foreach ($subscription in $subscriptions)
-{
+foreach ($subscription in $subscriptions) {
     # Set the subscription context
     Set-AzContext -Subscription $subscription.Id
 
     # Get all VMSS instances in the subscription
     $vmss = Get-AzVmss
 
-    foreach ($vmssInstance in $vmss)
-    {
+    foreach ($vmssInstance in $vmss) {
         # Get all VMs that are part of the VMSS
-        $vms = Get-AzVmssVM -ResourceGroupName $vmssInstance.ResourceGroupName -VMScaleSetName $vmssInstance.Name
+        $vms = Get-AzVmssVM -ResourceGroupName $vmssInstance.ResourceGroupName -VMScaleSetName $vmssInstance.Name -InstanceView
         
-        foreach ($vm in $vms)
-        {
+        foreach ($vm in $vms) {
             # Check if MMA extension is installed
-            $MMAExtension = $vm.Extensions | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.Type -eq 'MicrosoftMonitoringAgent' }
-            $OMSExtension = $vm.Extensions | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.Type -eq 'OmsAgentForLinux' }
+            $MMAExtension = $vm.Resources | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.VirtualMachineExtensionType -eq 'MicrosoftMonitoringAgent' }
+            $OMSExtension = $vm.Resources | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.VirtualMachineExtensionType -eq 'OmsAgentForLinux' }
 
-            # if ($MMAExtension -ne $null -or $OMSExtension -ne $null) {
-                if ($MMAExtension -eq $null -or $OMSExtension -eq $null) {
+            if ($MMAExtension -ne $null -or $OMSExtension -ne $null) {
+
                 # Add the VM to the list
                 $vmList += [PSCustomObject]@{
-                    SubscriptionId = $subscription.Id
+                    SubscriptionId    = $subscription.Id
                     ResourceGroupName = $vmssInstance.ResourceGroupName
-                    VMName = $vm.Name
+                    VMSSName          = $vmssInstance.Name
+                    InstanceID        = $vm.InstanceId
                 }
                 Write-Output "MMA or OMS extension is installed on VM $($vm.Name) in resource group $($resourceGroup.ResourceGroupName)."
-            } else {
+            }
+            else {
                 Write-Output "MMA or OMS extension is not installed on VM $($vm.Name) in resource group $($resourceGroup.ResourceGroupName)."
             }
         }
