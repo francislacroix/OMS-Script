@@ -26,7 +26,6 @@ foreach ($vm in $vmList) {
     $OMSExtension = $vm.Resources | Where-Object { $_.Publisher -eq 'Microsoft.EnterpriseCloud.Monitoring' -and $_.VirtualMachineExtensionType -eq 'OmsAgentForLinux' }
 
     if ($MMAExtension -ne $null -or $OMSExtension -ne $null) {
-        # Remove MMA extension
         Update-AzVmssInstance -ResourceGroupName $ResourceGroupName -VMScaleSetName $VMScaleSetName -InstanceId $VMInstanceID
         Write-Output "Updated Instance $VMInstanceID in VMSS $VMScaleSetName in resource group $ResourceGroupName."
     }
